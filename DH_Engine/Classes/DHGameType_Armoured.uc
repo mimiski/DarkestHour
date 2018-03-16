@@ -3,12 +3,12 @@
 // Darklight Games (c) 2008-2017
 //==============================================================================
 
-class DHConstructionGroup_Guns extends DHConstructionGroup;
+class DHGameType_Armoured extends DHGameType
+    abstract;
 
 defaultproperties
 {
-    MenuIcon=Texture'DH_InterfaceArt2_tex.Icons.at_small'
-    GroupName="Guns"
-    SortOrder=3
+    GameTypeName="Armoured"
+    bRoundEndsAtZeroReinf=true
+    bUseReinforcementWarning=true
 }
-

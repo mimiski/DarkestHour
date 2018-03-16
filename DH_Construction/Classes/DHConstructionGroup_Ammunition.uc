@@ -3,12 +3,12 @@
 // Darklight Games (c) 2008-2017
 //==============================================================================
 
-class DHConstructionGroup_Guns extends DHConstructionGroup;
+class DHConstructionGroup_Ammunition extends DHConstructionGroup;
 
 defaultproperties
 {
-    MenuIcon=Texture'DH_InterfaceArt2_tex.Icons.at_small'
-    GroupName="Guns"
-    SortOrder=3
+    GroupName="Ammunition"
+    MenuIcon=Texture'DH_InterfaceArt2_tex.icons.resupply_box'   // TODO: change
+    SortOrder=2
 }
 

@@ -3,12 +3,11 @@
 // Darklight Games (c) 2008-2017
 //==============================================================================
 
-class DHConstructionGroup_Guns extends DHConstructionGroup;
+class DHWeaponPickupTouchMessageParameters extends Object;
+
+var class<Inventory>    InventoryClass;
+var PlayerController    PlayerController;
 
 defaultproperties
 {
-    MenuIcon=Texture'DH_InterfaceArt2_tex.Icons.at_small'
-    GroupName="Guns"
-    SortOrder=3
 }
-

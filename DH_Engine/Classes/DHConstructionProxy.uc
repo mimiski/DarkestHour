@@ -19,10 +19,10 @@ var rotator                 LocalRotation;
 var rotator                 LocalRotationRate;
 
 // Projector
-var DHConstructionProxyProjector            Projector;
+var DHConstructionProxyProjector    Projector;
 
 // Attachments
-var array<DHConstructionProxyAttachment>    Attachments;
+var array<Actor>                    Attachments;
 
 function PostBeginPlay()
 {
@@ -309,7 +309,7 @@ function Tick(float DeltaTime)
     // Without it, the projector seems to "drift" away from the object it's
     // attached to. This is probably due to some sort of cumulative floating
     // point errors.
-    RL.Z = ConstructionClass.default.CollisionHeight;
+    RL.Z = CollisionHeight;
 
     if (Projector != none)
     {
@@ -504,8 +504,8 @@ function DHConstruction.ConstructionError GetProvisionalPosition(out vector OutL
             CircumferenceInMeters = class'DHUnits'.static.UnrealToMeters(CollisionRadius * Pi * 2);
             ArcLengthTraceCount = (CircumferenceInMeters / ConstructionClass.default.ArcLengthTraceIntervalInMeters) / 2;
 
-            // For safety's sake, make sure we don't trace more than 64 times.
-            ArcLengthTraceCount = Clamp(ArcLengthTraceCount, 0, 64);
+            // For safety's sake, make sure we don't overdo or underdo it.
+            ArcLengthTraceCount = Clamp(ArcLengthTraceCount, 8, 64);
 
             for (i = 0; i < ArcLengthTraceCount; ++i)
             {

@@ -3,12 +3,12 @@
 // Darklight Games (c) 2008-2017
 //==============================================================================
 
-class DHConstructionGroup_Guns extends DHConstructionGroup;
+class DH_F1GrenadeAmmo extends DHAmmunition;
 
 defaultproperties
 {
-    MenuIcon=Texture'DH_InterfaceArt2_tex.Icons.at_small'
-    GroupName="Guns"
-    SortOrder=3
+    MaxAmmo=3
+    InitialAmount=1
+    IconMaterial=Material'InterfaceArt_tex.HUD.F1nade_ammo'
+    IconCoords=(X1=445,Y1=75,X2=544,Y2=149)
 }
-

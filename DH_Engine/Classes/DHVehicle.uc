@@ -335,6 +335,12 @@ simulated function PostNetReceive()
         SetEngine();
     }
 
+    // EngineHealth is now <= 0 AND we are NOT displaying the engine fire (so lets have the client update things by calling SetEngine())
+    if (EngineHealth <= 0 && DamagedEffectHealthFireFactor != 1.0 && bClientInitialized)
+    {
+        SetEngine();
+    }
+
     // One of the tracks has been damaged (uses DamagedTreadPanner as an effective flag that net client hasn't already done this)
     if (((bLeftTrackDamaged && Skins.Length > LeftTreadIndex && Skins[LeftTreadIndex] != DamagedTreadPanner) ||
         (bRightTrackDamaged && Skins.Length > LeftTreadIndex && Skins[RightTreadIndex] != DamagedTreadPanner)) && Health > 0)
@@ -519,9 +525,16 @@ function Timer()
     // Check to see if we need to destroy a spiked, abandoned vehicle
     if (bSpikedVehicle)
     {
-        if (Health > 0 && IsVehicleEmpty())
+        if (Health > 0 && (!bHasTreads || IsVehicleEmpty()))
         {
-            KilledBy(self);
+            if (LastHitBy != none && LastHitBy.Pawn != none)
+            {
+                KilledBy(LastHitBy.Pawn);
+            }
+            else
+            {
+                KilledBy(Self);
+            }
         }
         else
         {
@@ -1845,6 +1858,12 @@ function TakeDamage(int Damage, Pawn InstigatedBy, vector HitLocation, vector Mo
         return;
     }
 
+    // Why take more damage if already dead??? (this might fix a bug where vehicles were being "seemingly" being exploded multiple times)
+    if (Health <= 0)
+    {
+        return;
+    }
+
     // Prevent griefer players from damaging own team's vehicles that haven't yet been entered, i.e. are sitting in a spawn area (not applicable in single player)
     if (!bDriverAlreadyEntered && Level.NetMode != NM_Standalone)
     {
@@ -2087,7 +2106,12 @@ function DamageEngine(int Damage, Pawn InstigatedBy, vector HitLocation, vector 
             PlaySound(DamagedShutDownSound, SLOT_None, FClamp(Abs(Throttle), 0.3, 0.75));
         }
 
-        SetEngine();
+        // There is no point in calling SetEngine() if the vehicle is destroyed and already burning
+        if (Health > 0 && DamagedEffectHealthFireFactor != 1.0)
+        {
+            SetEngine();
+            MaybeDestroyVehicle();
+        }
     }
 }
 
@@ -3311,8 +3335,8 @@ function MaybeDestroyVehicle()
 {
     local bool bDeactivatedFactoryWantsToDestroy;
 
-    // Do nothing if vehicle is a spawn vehicle or it isn't empty
-    if (ParentFactory == none || IsSpawnVehicle() || !IsVehicleEmpty())
+    // Do nothing if vehicle is a spawn vehicle
+    if (ParentFactory == none || IsSpawnVehicle())
     {
         return;
     }
@@ -3842,7 +3866,7 @@ defaultproperties
     VehHitpoints(1)=(PointRadius=0.0,PointScale=0.0,PointBone="",HitPointType=) // no.1 is no longer engine (neutralised by default, or overridden as required in subclass)
     TreadDamageThreshold=0.3
     bCanCrash=true
-    ImpactDamageThreshold=40.0
+    ImpactDamageThreshold=33.0
     ImpactDamageMult=0.001
     ImpactWorldDamageMult=0.001
     DriverDamageMult=1.0
