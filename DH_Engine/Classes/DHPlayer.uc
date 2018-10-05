@@ -6100,6 +6100,87 @@ exec function Jump(optional float F)
     }
 }
 
+// Toggle remote viewing
+exec function ToggleViewpoint()
+{
+    local DHObservationPoint V;
+
+    if (Viewpoint != none)
+    {
+        Viewpoint = none;
+    }
+    else
+    {
+        foreach AllActors(class'DHObservationPoint', V)
+        {
+            Viewpoint = V;
+            ViewpointRotationOffset = rot(0, 0, 0);
+        }
+    }
+}
+
+exec function ToggleViewpointMode()
+{
+    ViewpointMode = EViewpointMode((int(ViewpointMode) + 1) % 3);
+
+    Level.Game.Broadcast(self, "ViewpointMode" @ ViewpointMode);
+}
+
+function SetViewpoint(DHObservationPoint NewViewpoint)
+{
+    if (Viewpoint != none && Viewpoint != NewViewpoint)
+    {
+        Viewpoint.UnregisterObserver(self);
+    }
+
+    Viewpoint = NewViewpoint;
+    ViewpointRotationOffset = rot(0, 0, 0);
+    ViewpointViewTarget = none;
+    ViewpointMode = VM_FreeLook;
+
+    if (Viewpoint != none)
+    {
+        Viewpoint.RegisterObserver(self);
+    }
+}
+
+event PlayerCalcView(out Actor ViewActor, out vector CameraLocation, out rotator CameraRotation)
+{
+    if (Viewpoint != none)
+    {
+        // TODO: viewactor maybe should be first person mesh?
+        ViewActor = Viewpoint;
+        CalcViewpointView(Viewpoint, CameraLocation, CameraRotation);
+    }
+    else
+    {
+        super.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+    }
+}
+
+// New calcview stuff to handle our death camera
+function CalcViewpointView(DHObservationPoint Viewpoint, out vector CameraLocation, out rotator CameraRotation )
+{
+    local float T;
+
+    if (Viewpoint == none)
+    {
+        return;
+    }
+
+    CameraLocation = Viewpoint.Location;
+    CameraRotation = Viewpoint.Rotation + ViewpointRotationOffset;
+
+    if (ViewpointViewTarget != none && ViewpointMode == VM_Target)
+    {
+        CameraRotation = rotator(Normal(ViewpointViewTarget.Location - CameraLocation));
+        CameraRotation.Pitch = Max(0, CameraRotation.Pitch);
+
+        T = float(CameraRotation.Pitch) / 16384;
+        DesiredFOV = class'UInterp'.static.Linear(T, 50, 110);
+    }
+}
+
 defaultproperties
 {
     CorpseStayTime=15
